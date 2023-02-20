@@ -30,7 +30,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
-    'rest_framework_simplejwt',
     'django_filters',
     'django_ckeditor_5',
     'api',
@@ -130,7 +129,7 @@ MEDIA_URL = '/media/'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 CORS_ALLOWED_ORIGINS = [
-    
+    "http://localhost:5173",
 ]
 
 # Default primary key field type

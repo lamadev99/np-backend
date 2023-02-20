@@ -7,6 +7,9 @@ router = routers.DefaultRouter()
 router.register(r'profile', WriterProfileViewSet)
 router.register(r'news', NewsViewSet)
 router.register(r'comment', CommentViewSet)
+router.register(r'category', CategoryViewSet)
+router.register(r'subCategory', SubCategoryViewSet)
+router.register(r'page', PageGeneratorViewSet)
 
 
 urlpatterns = [

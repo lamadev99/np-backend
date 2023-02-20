@@ -16,7 +16,7 @@ admin.site.unregister(User)
 admin.site.register(User, CustomizedUserAdmin)
 
 class WriterAdmin(admin.ModelAdmin):
-    list_display = ('writer', 'email', 'fname', 'lname', 'is_admin')
+    list_display = ['writer', 'email', 'fname', 'lname', 'is_admin']
     
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -43,7 +43,6 @@ class NewsAdmin(admin.ModelAdmin):
         if db_field.name == "writer":
             kwargs['queryset'] = Writer.objects.filter(writer=request.user.id)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
 admin.site.register(News, NewsAdmin)
 
 class CommentAdmin(admin.ModelAdmin):
@@ -53,3 +52,14 @@ admin.site.register(Comment, CommentAdmin)
 class NewsSubsAdmin(admin.ModelAdmin):
     list_display = ('nsId', 'email', 'created_at')
 admin.site.register(NewsSubscription, NewsSubsAdmin)
+
+class PageGeneratorAdmin(admin.ModelAdmin):
+    list_display = ('slug', 'title', 'meta_keywords', 'created_at')
+admin.site.register(PageGenerator, PageGeneratorAdmin)
+
+admin.site.register(Category)
+
+class SubCategoryAdmin(admin.ModelAdmin):
+    list_display = ['category', 'name' ]
+admin.site.register(SubCategory, SubCategoryAdmin)
+

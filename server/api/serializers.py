@@ -23,3 +23,20 @@ class NewsSubscriptionSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model=NewsSubscription
         fields="__all__"
+
+class PageGeneratorSerializer(serializers.HyperlinkedModelSerializer):
+    slug=serializers.ReadOnlyField()
+    class Meta:
+        model=PageGenerator
+        fields="__all__"
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Category
+        fields="__all__"
+
+class SubCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model=SubCategory
+        fields="__all__"
+

@@ -9,6 +9,19 @@ from django.core.files.storage import default_storage
 from django_ckeditor_5.fields import CKEditor5Field
 
 # Create your models here.
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+    
+    def __str__(self):
+        return self.name
+
+class SubCategory(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    
+    def __str__(self):
+        return self.name
+
 class Writer(models.Model):
     writer = models.OneToOneField(User, on_delete=models.CASCADE)
     email = models.EmailField(verbose_name='Email', max_length=255, unique=True)
@@ -37,20 +50,22 @@ class Writer(models.Model):
 
 class News(models.Model):
     writer = models.ForeignKey(Writer, on_delete=models.CASCADE)
-    title = models.CharField(max_length=255)
+    title = models.TextField()
     slug = AutoSlugField(populate_from='title', primary_key=True)
-    category = models.CharField(max_length=255)
-    subCategory = models.CharField(max_length=255)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    subCategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE, blank=True, null=True)
     content = CKEditor5Field('Text', config_name='extends')
-    keywords = models.CharField(max_length=255)
-    metaWord = models.CharField(max_length=155)
+    keywords = models.TextField(max_length=255)
+    metaWord = models.TextField(max_length=155)
     views = models.IntegerField(default=0)
     location = models.CharField(max_length=255, null=True, blank=True)
 
     is_video = models.BooleanField(default=False)
     is_featured = models.BooleanField(default=False)
+    is_writer_pick = models.BooleanField(default=False)
+    is_draft = models.BooleanField(default=False)
     image = models.ImageField(upload_to='news/', null=False, blank=False)
-    alt = models.CharField(max_length=255)
+    alt = models.TextField(max_length=100, blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -59,18 +74,13 @@ class News(models.Model):
         super().save(*args, **kwargs)
         img = Image.open(self.image.path)
 
-        if img.height > 720 or img.width > 1280:
+        if img.width > 1280 or img.height > 720:
             output_size = (1280, 720)
             img.thumbnail(output_size)
             img.save(self.image.path)
             img.close()
 
-@receiver(post_delete, sender=News)
-def delete_file(sender, instance, **kwargs):
-    """Deletes file from filesystem when corresponding `MyModel` object is deleted."""
-    if instance.image:
-        if os.path.isfile(instance.image.path):
-            os.remove(instance.image.path)
+
 
 class Comment(models.Model):
     news = models.ForeignKey(News, on_delete=models.CASCADE)
@@ -86,3 +96,33 @@ class NewsSubscription(models.Model):
     nsId = models.AutoField(primary_key=True)
     email = models.EmailField(max_length=255, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
+
+class PageGenerator(models.Model):
+    title = models.CharField(max_length=255)
+    slug = AutoSlugField(populate_from="title", primary_key=True)
+    excerpt = models.TextField(max_length=155)
+    body = CKEditor5Field('Text', config_name='extends')
+    meta_description = models.TextField(max_length=155)
+    meta_keywords = models.TextField(max_length=155)
+    status = models.BooleanField(default=False)
+    image = models.ImageField(upload_to="page/", blank=True, null=True)
+    alt = models.TextField(max_length=100, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        img = Image.open(self.image.path)
+
+        if img.width > 1280 or img.height > 720:
+            output_size = (1280, 720)
+            img.thumbnail(output_size)
+            img.save(self.image.path)
+            img.close()
+
+@receiver(post_delete, sender=[News, Writer, PageGenerator])
+def delete_file(sender, instance, **kwargs):
+    """Deletes file from filesystem when corresponding `MyModel` object is deleted."""
+    if instance.image:
+        if os.path.isfile(instance.image.path):
+            os.remove(instance.image.path)
